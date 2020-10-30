@@ -1,7 +1,9 @@
 const listElement = document.querySelector('.posts');
 const postTemplate = document.getElementById('single-post');
+const form = document.querySelector('#new-post form');
+const fetchButton = document.querySelector('#available-posts button');
 
-function sendHttpRequest(method, url) {
+function sendHttpRequest(method, url, data) {
   const promise = new Promise((resolve, reject) => {
     // this object will allow us to send http requests is built in all browsers
     const xhr = new XMLHttpRequest();
@@ -12,7 +14,7 @@ function sendHttpRequest(method, url) {
     xhr.onload = function () {
       resolve(xhr.response);
     };
-    xhr.send();
+    xhr.send(JSON.stringify(data));
   });
   return promise;
 }
@@ -50,4 +52,26 @@ async function fetchPosts() {
   }
 }
 
-fetchPosts();
+async function createPost(title, content) {
+  const userId = Math.random();
+  // make sure we comply with the API format as stated here https://jsonplaceholder.typicode.com/
+  const post = {
+    title: title,
+    body: content,
+    userId: userId,
+  };
+
+  sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', post);
+}
+
+fetchButton.addEventListener('click', fetchPosts);
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  // currentTarget -  It always refers to the element to which the event handler has been attached
+  // target - identifies the element on which the event occurred  (add button in this case)
+  const enteredTitle = event.currentTarget.querySelector('#title').value;
+  const enteredContent = event.currentTarget.querySelector('#content').value;
+  createPost(enteredTitle,enteredContent);
+});
+
+
